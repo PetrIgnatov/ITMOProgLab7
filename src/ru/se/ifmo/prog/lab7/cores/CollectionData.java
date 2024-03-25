@@ -1,5 +1,7 @@
 package ru.se.ifmo.prog.lab7.cores;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import ru.se.ifmo.prog.lab7.classes.*;
 import java.io.*;
@@ -14,177 +16,200 @@ public class CollectionData {
 	private String filename;
 	private java.util.Date initDate;
 	private int maxId;
-
-	public CollectionData(String filename) {
+	
+	public CollectionData() {
 		maxId = 0;
 		initDate = new java.util.Date();
-		this.filename = filename;
 		dragons = new LinkedList<Dragon>();
-		FileInputStream inputStream = null;
-		InputStreamReader reader = null;
+	}
+
+	public CollectionData(LinkedList<String> data) {
+		maxId = 0;
+		initDate = new java.util.Date();
+		dragons = new LinkedList<Dragon>();
 		try {
-			inputStream = new FileInputStream(filename);
-			reader = new InputStreamReader(inputStream);
-			int temp;
-			String inputDragon = "";
-			while ((temp = reader.read()) != -1) {
-				if (temp != 10) {
-					inputDragon += (char)temp;
+			for (String dragon : data) {
+				try {
+					String[] splitted = dragon.split(";");
+					Color col = null;
+					switch(splitted[6]) {
+						case "GREEN":
+							col = Color.GREEN;
+							break;
+						case "YELLOW":
+							col = Color.YELLOW;
+							break;
+						case "ORANGE":
+							col = Color.ORANGE;
+							break;
+						case "WHITE":
+							col = Color.WHITE;
+							break;	
+						case "":
+							col = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный цвет \"" + splitted[6] + "\"");
+					}
+					DragonType type = null; 
+					switch(splitted[7]) {
+						case "WATER":
+							type = DragonType.WATER;
+							break;
+						case "UNDERGROUND":
+							type = DragonType.UNDERGROUND;	
+							break;
+						case "AIR":
+							type = DragonType.AIR;
+							break;
+						case "":
+							type = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный тип \"" + splitted[7] + "\"");
+					}
+					DragonCharacter character = null;
+					switch(splitted[8]) {
+						case "EVIL":
+							character = DragonCharacter.EVIL;
+							break;
+						case "GOOD":
+							character = DragonCharacter.GOOD;	
+							break;
+						case "CHAOTIC":
+							character = DragonCharacter.CHAOTIC;
+							break;
+						case "FICKLE":
+							character = DragonCharacter.FICKLE;	
+							break;
+						case "CHAOTIC_EVIL":
+							character = DragonCharacter.CHAOTIC_EVIL;
+							break;
+						case "":
+							character = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный характер \"" + splitted[8] + "\"");
+					}
+					String format = "yyyy-MM-dd HH:mm:ss";
+					DateTimeFormatter formater = DateTimeFormatter.ofPattern(format);
+					LocalDateTime date = LocalDateTime.parse(splitted[4], formater);
+					maxId = Math.max(maxId, Integer.parseInt(splitted[0]));
+					for (int i = 0; i < dragons.size(); ++i) {
+						if (Integer.parseInt(splitted[0]) == dragons.get(i).getId()) {
+							throw new ConvertationException("Ошибка! У двух драконов одинаковый ID");
+						}
+					}
+					dragons.add(new Dragon(
+								Integer.parseInt(splitted[0]),
+								splitted[1] == "" ? null : splitted[1],
+								splitted[2] == "" ? null : Integer.parseInt(splitted[2]),
+								splitted[3] == "" ? null : Float.parseFloat(splitted[3]),
+								date,
+								Integer.parseInt(splitted[5]),
+								col,type,character,
+								splitted[9] == "" ? null : Double.parseDouble(splitted[9]),
+								splitted[10] == "" ? null : Float.parseFloat(splitted[10])));
 				}
-				else {
-					try {
-						String[] splitted = new String[11];
-						for (int i = 0; i < 11; ++i) {
-							splitted[i] = "";
-						}
-						int pos = 0;
-						for (int i = 0; i < inputDragon.length(); ++i) {
-							if (inputDragon.charAt(i) == ';') {
-								++pos;
-								if ((i == inputDragon.length()-1 && pos != 11) || (i < inputDragon.length()-1 && pos >= 11)) {
-									throw new FileInputException("Error! The given file's data doesn't match the required type");
-								}
-							}
-							else
-							{
-								if ((i == inputDragon.length()-1 && pos != 10) || pos >= 11) {
-									throw new FileInputException("Error! The given file's data doesn't match the required type");
-								}
-								splitted[pos] += inputDragon.charAt(i);
-							}
-						}
-						Color col = null;
-						switch(splitted[6]) {
-							case "GREEN":
-								col = Color.GREEN;
-								break;
-							case "YELLOW":
-								col = Color.YELLOW;
-								break;
-							case "ORANGE":
-								col = Color.ORANGE;
-								break;
-							case "WHITE":
-								col = Color.WHITE;
-								break;	
-							case "":
-								col = null;
-								break;
-							default:
-								throw new ConvertationException("Error! Unknown color \"" + splitted[6] + "\"");
-						}
-						DragonType type = null; 
-						switch(splitted[7]) {
-							case "WATER":
-								type = DragonType.WATER;
-								break;
-							case "UNDERGROUND":
-								type = DragonType.UNDERGROUND;	
-								break;
-							case "AIR":
-								type = DragonType.AIR;
-								break;
-							case "":
-								type = null;
-								break;
-							default:
-								throw new ConvertationException("Error! Unknown type \"" + splitted[7] + "\"");
-						}
-						DragonCharacter character = null;
-						switch(splitted[8]) {
-							case "EVIL":
-								character = DragonCharacter.EVIL;
-								break;
-							case "GOOD":
-								character = DragonCharacter.GOOD;	
-								break;
-							case "CHAOTIC":
-								character = DragonCharacter.CHAOTIC;
-								break;
-							case "FICKLE":
-								character = DragonCharacter.FICKLE;	
-								break;
-							case "CHAOTIC_EVIL":
-								character = DragonCharacter.CHAOTIC_EVIL;
-								break;
-							case "":
-								character = null;
-								break;
-							default:
-								throw new ConvertationException("Error! Unknown character \"" + splitted[8] + "\"");
-						}
-						String format = "EEE MMM dd HH:mm:ss z yyyy";
-						SimpleDateFormat formater = new SimpleDateFormat(format, Locale.ENGLISH);
-						java.util.Date date = null;
-						date = formater.parse(splitted[4]);
-						maxId = Math.max(maxId, Integer.parseInt(splitted[0]));
-						for (int i = 0; i < dragons.size(); ++i) {
-							if (Integer.parseInt(splitted[0]) == dragons.get(i).getId()) {
-								throw new ConvertationException("Error! Two dragons from file have the same IDs");
-							}
-						}
-						dragons.add(new Dragon(
-									Integer.parseInt(splitted[0]),
-									splitted[1] == "" ? null : splitted[1],
-									splitted[2] == "" ? null : Integer.parseInt(splitted[2]),
-									splitted[3] == "" ? null : Float.parseFloat(splitted[3]),
-									date,
-									Integer.parseInt(splitted[5]),
-									col,type,character,
-									splitted[9] == "" ? null : Double.parseDouble(splitted[9]),
-									splitted[10] == "" ? null : Float.parseFloat(splitted[10])));
-					}
-					catch (Exception e) {
-						System.out.println(e.getMessage());
-					}
-					finally {
-						inputDragon = "";
-					}
+				catch (Exception e) {
+					System.out.println(e.getMessage());
 				}
 			}
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("Error! File \"" + filename + "\" not found or not accessible");
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-				if (inputStream != null) {
-					inputStream.close();
-				}
-			}
-			catch (IOException e) {
-				System.out.println("Error! Input/Output exception");
-			}
-		}
 	}
-	
-	public void save() {
+
+	public void addDragons(LinkedList<String> data) {
 		try {
-			FileOutputStream outputStream = new FileOutputStream(filename);
-			OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-			writer.flush();
-			if (dragons.size() > 0) {
-				for (int i = 0; i < dragons.size()-1; ++i) {
-					writer.write(dragons.get(i).toString()+"\n");
+			for (String dragon : data) {
+				try {
+					String[] splitted = dragon.split(";");
+					Color col = null;
+					switch(splitted[6]) {
+						case "GREEN":
+							col = Color.GREEN;
+							break;
+						case "YELLOW":
+							col = Color.YELLOW;
+							break;
+						case "ORANGE":
+							col = Color.ORANGE;
+							break;
+						case "WHITE":
+							col = Color.WHITE;
+							break;	
+						case "":
+							col = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный цвет \"" + splitted[6] + "\"");
+					}
+					DragonType type = null; 
+					switch(splitted[7]) {
+						case "WATER":
+							type = DragonType.WATER;
+							break;
+						case "UNDERGROUND":
+							type = DragonType.UNDERGROUND;	
+							break;
+						case "AIR":
+							type = DragonType.AIR;
+							break;
+						case "":
+							type = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный тип \"" + splitted[7] + "\"");
+					}
+					DragonCharacter character = null;
+					switch(splitted[8]) {
+						case "EVIL":
+							character = DragonCharacter.EVIL;
+							break;
+						case "GOOD":
+							character = DragonCharacter.GOOD;	
+							break;
+						case "CHAOTIC":
+							character = DragonCharacter.CHAOTIC;
+							break;
+						case "FICKLE":
+							character = DragonCharacter.FICKLE;	
+							break;
+						case "CHAOTIC_EVIL":
+							character = DragonCharacter.CHAOTIC_EVIL;
+							break;
+						case "":
+							character = null;
+							break;
+						default:
+							throw new ConvertationException("Ошибка! Неизвестный характер \"" + splitted[8] + "\"");
+					}
+					String format = "yyyy-MM-dd HH:mm:ss";
+					DateTimeFormatter formater = DateTimeFormatter.ofPattern(format);
+					LocalDateTime date = LocalDateTime.parse(splitted[4], formater);
+					maxId = Math.max(maxId, Integer.parseInt(splitted[0]));
+					for (int i = 0; i < dragons.size(); ++i) {
+						if (Integer.parseInt(splitted[0]) == dragons.get(i).getId()) {
+							throw new ConvertationException("Ошибка! У двух драконов одинаковый ID");
+						}
+					}
+					dragons.add(new Dragon(
+								Integer.parseInt(splitted[0]),
+								splitted[1] == "" ? null : splitted[1],
+								splitted[2] == "" ? null : Integer.parseInt(splitted[2]),
+								splitted[3] == "" ? null : Float.parseFloat(splitted[3]),
+								date,
+								Integer.parseInt(splitted[5]),
+								col,type,character,
+								splitted[9] == "" ? null : Double.parseDouble(splitted[9]),
+								splitted[10] == "" ? null : Float.parseFloat(splitted[10])));
 				}
-				writer.write(dragons.getLast().toString()+"\n");
+				catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			}
-			if (writer != null) {
-				writer.close();
-			}
-			if (outputStream != null) {
-				outputStream.flush();
-				outputStream.close();
-			}
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("Error! File \"" + filename + "\" not found or not accessible");
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -265,14 +290,14 @@ public class CollectionData {
 				default:
 					throw new ConvertationException("Error! Unknown character \"" + splitted[6] + "\"");
 			}
-			String format = "EEE MMM dd HH:mm:ss z yyyy";
-			SimpleDateFormat formater = new SimpleDateFormat(format, Locale.FRENCH);
-			java.util.Date date = new java.util.Date();
+			String format = "yyyy-MM-dd HH:mm:ss";
+			DateTimeFormatter formater = DateTimeFormatter.ofPattern(format);
+			LocalDateTime date = LocalDateTime.parse(splitted[4], formater);
 			if (splitted[0] == "") {
-				throw new IOException("Error! Name can't be null");
+				throw new IOException("Ошибка! Имя не может быть равен null");
 			}
 			if (splitted[3] == "") {
-				throw new IOException("Error! Age can't be null");
+				throw new IOException("Ошибка! Возраст не может быть равен null");
 			}
 			return new Dragon(
 					id,
@@ -302,7 +327,7 @@ public class CollectionData {
 	public void add(Dragon dragon) {
 		if (dragon != null) {
 			dragon.setId(++maxId);
-			dragon.setDate(new java.util.Date());
+			dragon.setDate(LocalDateTime.now());
 			dragons.add(dragon);
 		}
 	}
@@ -327,7 +352,7 @@ public class CollectionData {
 		try {
 			if (!dragon.equals(null)) {
 				dragon.setId(id);
-				dragon.setDate(new java.util.Date());
+				dragon.setDate(LocalDateTime.now());
 				System.out.println(dragon.toString());
 				dragons.set(ind, dragon);
 			}

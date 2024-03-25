@@ -14,6 +14,7 @@ import java.util.Iterator;
 import ru.se.ifmo.prog.lab7.commands.*;
 import ru.se.ifmo.prog.lab7.cores.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
+import java.sql.*;
 
 public class UDPReader {
 	private DatagramSocket datagramSocket;
@@ -69,7 +70,7 @@ public class UDPReader {
 									System.out.print(command.getParameterAdvices()[parametersptr]);
 								}
 								else {
-									this.localExecute(shallow);
+									this.localExecute(shallow, logger);
 								}
 							}
 							catch (Exception e) {
@@ -84,7 +85,7 @@ public class UDPReader {
 							parametersptr = -1;
 							try {
 								shallow.setDragon(parameters);
-								this.localExecute(shallow);								
+								this.localExecute(shallow, logger);								
 							}
 							catch (ConvertationException e) {
 								System.out.println(e.getMessage());
@@ -103,7 +104,7 @@ public class UDPReader {
 		}
 	}
 	
-	private void localExecute(CommandShallow shallow) {
+	private void localExecute(CommandShallow shallow, Logger logger) {
 		Integer stacksize = 0;
 		localHistory.addLast(shallow.getCommand());
 		if (localHistory.size() > 5) {
@@ -118,6 +119,16 @@ public class UDPReader {
 		for (String s: response.getMessage()) {
 			if (s.equals("exit")) {
 				this.stop();
+				break;
+			}
+			else if (s.equals("save")) {
+				try {
+					connector.save(collection.getDragons());
+				}
+				catch (SQLException e) {
+					System.out.println(e.getMessage());
+					logger.severe("Ошибка сохранения!");
+				}
 				break;
 			}
 			System.out.println(s);

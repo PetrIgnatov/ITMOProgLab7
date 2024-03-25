@@ -25,7 +25,7 @@ public class Main {
 			System.out.println("Ошибка! Не удалось загрузить данные из файла");
 			return;
 		}
-		DatabaseConnector DBConnector = new DatabaseConnector();
+		DatabaseConnector DBConnector;
 		try {	
 			DBConnector = new DatabaseConnector(logininfo);
 		}
@@ -33,16 +33,21 @@ public class Main {
 			logger.severe("Ошибка! Неверные имя пользователя или пароль");
 			return;
 		}
+		CollectionData collection = new CollectionData();
 		try {
-			DBConnector.getDragons();
+			collection.addDragons(DBConnector.getDragons());
 		}
 		catch (SQLException e) {
 			logger.severe("Ошибка! Не получается получить информацию о драконах");
-		}
-		CollectionData collection = new CollectionData("a.csv");
+		}	
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			logger.info("Сохраняем коллекцию");
-			collection.save();
+			try {
+				DBConnector.save(collection.getDragons());
+			}
+			catch (SQLException e) {
+				logger.severe("Ошибка сохранения!");
+			}
 			}));
 		CommandManager commandmanager = new CommandManager();
 		String[] comnames = {"help", "info", "show", "add", "update", "remove_by_id", "clear", "save", "execute_script", "exit", "remove_at", "sort", "history", "sum_of_age", "print_field_ascending_character", "print_field_descending_character"};

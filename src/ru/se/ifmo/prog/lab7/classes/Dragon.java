@@ -1,5 +1,7 @@
 package ru.se.ifmo.prog.lab7.classes;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.io.Serializable;
 
@@ -7,14 +9,14 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 	private int id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
 	private String name; //Поле не может быть null, Строка не может быть пустой
 	private Coordinates coordinates; //Поле не может быть null
-	private java.util.Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+	private LocalDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
 	private int age; //Значение поля должно быть больше 0
 	private Color color; //Поле может быть null
 	private DragonType type; //Поле может быть null
 	private DragonCharacter character; //Поле может быть null
 	private DragonCave cave; //Поле может быть null
 	
-	public Dragon(int id, String name, Coordinates coordinates, java.util.Date creationDate, int age, Color color, DragonType type, DragonCharacter character, DragonCave cave) {
+	public Dragon(int id, String name, Coordinates coordinates, LocalDateTime creationDate, int age, Color color, DragonType type, DragonCharacter character, DragonCave cave) {
 		this.setId(id);
 		this.setName(name);
 		this.setCoordinates(coordinates);
@@ -26,7 +28,7 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 		this.setCave(cave);	
 	}
 
-	public Dragon(int id, String name, Integer x, Float y, java.util.Date creationDate, int age, Color color, DragonType type, DragonCharacter character, Double depth, Float numberOfTreasures) {
+	public Dragon(int id, String name, Integer x, Float y, LocalDateTime creationDate, int age, Color color, DragonType type, DragonCharacter character, Double depth, Float numberOfTreasures) {
 		this.setId(id);
 		this.setName(name);
 		this.setCoordinates(new Coordinates(x, y));
@@ -66,7 +68,7 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 		this.coordinates = coordinates;
 	}
 	
-	public void setDate(java.util.Date creationDate) {
+	public void setDate(LocalDateTime creationDate) {
 		if (creationDate == null) {
 			throw new IllegalArgumentException("Error! Creation Date can't be null for dragon with name \"" + this.name + "\"");
 		}
@@ -111,7 +113,7 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 		return this.coordinates;
 	}
 	
-	public java.util.Date getDate() {
+	public LocalDateTime getDate() {
 		return this.creationDate;
 	}
 	
@@ -123,12 +125,57 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 		return this.color;
 	}
 	
+	public String getColorStr() {
+		switch (this.color) {
+		  case GREEN:
+		    return "GREEN";
+		  case YELLOW:
+		    return "YELLOW";
+		  case ORANGE:
+		    return "ORANGE";
+		  case WHITE:
+		    return "WHITE";
+		  default:
+		    return "NULL";
+		}
+	}
+	
 	public DragonType getType() {
 		return this.type;
 	}
 	
+	public String getTypeStr() {
+		switch (this.type) {
+		  case WATER:
+		    return "WATER";
+		  case UNDERGROUND:
+		    return "UNDERGROUND";
+		  case AIR:
+		    return "AIR";
+		  	default:
+		    return "NULL";
+		}
+	}
+	
 	public DragonCharacter getCharacter() {
 		return this.character;
+	}
+	
+	public String getCharacterStr() {
+		switch (this.character) {
+		  case EVIL:
+		    return "EVIL";
+		  case GOOD:
+		    return "GOOD";
+		  case CHAOTIC:
+		    return "CHAOTIC";
+		  case CHAOTIC_EVIL:
+		    return "CHAOTIC_EVIL";
+		  	case FICKLE:
+		    return "FICKLE";
+		  	default:
+		    return "NULL";
+		}
 	}
 	
 	public DragonCave getCave() {

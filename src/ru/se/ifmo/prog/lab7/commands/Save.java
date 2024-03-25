@@ -11,9 +11,8 @@ public class Save extends Command {
 	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata) {
 		super.check(args.length);
 		if (stacksize > 10000) {
-      return new Response(new String[0]);
-    }
-		collectiondata.save();
-		return new Response(new String[0]);
+			return new Response(new String[0]);
+		}
+		return new Response(new String[] {"save"});
 	}
 }

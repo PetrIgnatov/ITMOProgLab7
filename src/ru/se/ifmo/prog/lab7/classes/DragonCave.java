@@ -39,6 +39,14 @@ public class DragonCave implements Comparable<DragonCave>, Serializable {
 	public float getNumberOfTreasures() {
 		return numberOfTreasures.floatValue();
 	}
+	
+	public Double getDepthPtr() {
+		return depth;
+	}
+	
+	public Float getNumberOfTreasuresPtr() {
+		return numberOfTreasures;
+	}
 	@Override
 	public boolean equals(Object other) {
 		if (other == this) {
