@@ -102,14 +102,15 @@ public class CollectionData {
 					}
 					dragons.add(new Dragon(
 								Integer.parseInt(splitted[0]),
-								splitted[1] == "" ? null : splitted[1],
-								splitted[2] == "" ? null : Integer.parseInt(splitted[2]),
-								splitted[3] == "" ? null : Float.parseFloat(splitted[3]),
+								splitted[1].equals("") ? null : splitted[1],
+								splitted[2].equals("") ? null : Integer.parseInt(splitted[2]),
+								splitted[3].equals("") ? null : Float.parseFloat(splitted[3]),
 								date,
 								Integer.parseInt(splitted[5]),
 								col,type,character,
-								splitted[9] == "" ? null : Double.parseDouble(splitted[9]),
-								splitted[10] == "" ? null : Float.parseFloat(splitted[10])));
+								splitted[9].equals("") ? null : Double.parseDouble(splitted[9]),
+								splitted[10].equals("") ? null : Float.parseFloat(splitted[10]),
+								splitted[11].equals("") ? null : splitted[11]));
 				}
 				catch (Exception e) {
 					System.out.println(e.getMessage());
@@ -197,14 +198,15 @@ public class CollectionData {
 					}
 					dragons.add(new Dragon(
 								Integer.parseInt(splitted[0]),
-								splitted[1] == "" ? null : splitted[1],
-								splitted[2] == "" ? null : Integer.parseInt(splitted[2]),
-								splitted[3] == "" ? null : Float.parseFloat(splitted[3]),
+								splitted[1].equals("") ? null : splitted[1],
+								splitted[2].equals("") ? null : Integer.parseInt(splitted[2]),
+								splitted[3].equals("") ? null : Float.parseFloat(splitted[3]),
 								date,
 								Integer.parseInt(splitted[5]),
 								col,type,character,
-								splitted[9] == "" ? null : Double.parseDouble(splitted[9]),
-								splitted[10] == "" ? null : Float.parseFloat(splitted[10])));
+								splitted[9].equals("") ? null : Double.parseDouble(splitted[9]),
+								splitted[10].equals("") ? null : Float.parseFloat(splitted[10]),
+								splitted[11].equals("") ? null : splitted[11]));
 				}
 				catch (Exception e) {
 					System.out.println(e.getMessage());
@@ -301,14 +303,15 @@ public class CollectionData {
 			}
 			return new Dragon(
 					id,
-					splitted[0] == "" ? null : splitted[0],
-					splitted[1] == "" ? null : Integer.parseInt(splitted[1]),
-					splitted[2] == "" ? null : Float.parseFloat(splitted[2]),
+					splitted[0].equals("") ? null : splitted[0],
+					splitted[1].equals("") ? null : Integer.parseInt(splitted[1]),
+					splitted[2].equals("") ? null : Float.parseFloat(splitted[2]),
 					date,
-					splitted[3] == "" ? null : Integer.parseInt(splitted[3]),
+					splitted[3].equals("") ? null : Integer.parseInt(splitted[3]),
 					col,type,character,
-					splitted[7] == "" ? null : Double.parseDouble(splitted[7]),
-					splitted[8] == "" ? null : Float.parseFloat(splitted[8]));
+					splitted[7].equals("") ? null : Double.parseDouble(splitted[7]),
+					splitted[8].equals("") ? null : Float.parseFloat(splitted[8]),
+					splitted[9].equals("") ? null : splitted[9]);
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());

@@ -9,7 +9,7 @@ public class Show extends Command {
 		super("show", "вывести в стандартный поток вывода все элементы коллекции в строковом представлении", 1);
 	}
 	@Override
-	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata) {
+	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String login, String password) {
 		super.check(args.length);
 		if (stacksize > 10000) {
 			return new Response(new String[0]);

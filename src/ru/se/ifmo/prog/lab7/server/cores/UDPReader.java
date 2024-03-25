@@ -63,10 +63,10 @@ public class UDPReader {
 						if (com.length > 0) {
 							try {
 								Command command = commandmanager.getCommand(com[0]);	
-								shallow = new CommandShallow(command, com);
+								shallow = new CommandShallow(command, com, "admin", "admin");
 								if (command.getParameterAdvices() != null) {
 									parametersptr = 0;
-									parameters = new String[command.getParameterAdvices().length];
+									parameters = new String[command.getParameterAdvices().length+1];
 									System.out.print(command.getParameterAdvices()[parametersptr]);
 								}
 								else {
@@ -81,10 +81,11 @@ public class UDPReader {
 					else {
 						parameters[parametersptr] = input;
 						parametersptr++;
-						if (parametersptr == parameters.length) {
+						if (parametersptr == parameters.length - 1) {
 							parametersptr = -1;
+							parameters[parameters.length-1] = "admin";
 							try {
-								shallow.setDragon(parameters);
+								shallow.setDragon(parameters, "admin");
 								this.localExecute(shallow, logger);								
 							}
 							catch (ConvertationException e) {
@@ -115,7 +116,7 @@ public class UDPReader {
 				System.out.println(com.getName());
 			}
 		}
-		Response response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection);
+		Response response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, "admin", "admin");
 		for (String s: response.getMessage()) {
 			if (s.equals("exit")) {
 				this.stop();
@@ -153,7 +154,7 @@ public class UDPReader {
 			logger.info("Got packet with command " + shallow.getCommand().getName());
 			if (!shallow.getCommand().getName().equals("history")) {
 				Integer stacksize = 0;
-				response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection);
+				response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, shallow.getLogin(), shallow.getPassword());
 			}
 			else {
 				String[] history = new String[histories.get(datagramPacket.getAddress()).size()];

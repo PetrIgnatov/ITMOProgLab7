@@ -7,7 +7,7 @@ import ru.se.ifmo.prog.lab7.commands.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
 
 public class ScriptReader {
-	public static LinkedList<CommandShallow> readCommands(String filename, CommandManager commandmanager) {
+	public static LinkedList<CommandShallow> readCommands(String filename, CommandManager commandmanager, String login, String password) {
 		FileInputStream inputStream;
 		InputStreamReader reader;
 		LinkedList<CommandShallow> shallows = new LinkedList<CommandShallow>();
@@ -52,7 +52,7 @@ public class ScriptReader {
 										parametersptr = 0;
 										parameters = new String[command.getParameterAdvices().length];
 									}
-									shallow = new CommandShallow(command, com);
+									shallow = new CommandShallow(command, com, login, password);
 									//Случай add или update
 									shallows.addLast(shallow);
 								}
@@ -68,7 +68,7 @@ public class ScriptReader {
 							if (parametersptr == parameters.length) {
 								parametersptr = -1;
 								try {
-									shallow.setDragon(parameters);
+									shallow.setDragon(parameters, login);
 								}
 								catch (ConvertationException e) {
 									System.out.println(e.getMessage());

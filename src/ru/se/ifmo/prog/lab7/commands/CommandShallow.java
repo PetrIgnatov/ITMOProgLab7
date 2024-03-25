@@ -10,17 +10,23 @@ public class CommandShallow implements Serializable {
 	private String[] args;
 	private Dragon dragon;
 	private CommandShallow[] commands;
+	private String login;
+	private String password;
 	
 	public CommandShallow() {
 		this.command = null;
 		this.args = null;
 		this.dragon = null;
+		this.login = null;
+		this.password = null;
 	}
 
-	public CommandShallow(Command command, String[] args) {
+	public CommandShallow(Command command, String[] args, String login, String password) {
 		this.command = command;
 		this.args = args;
 		this.dragon = null;
+		this.login = login;
+		this.password = password;
 		this.command.check(args.length);
 	}
 
@@ -40,7 +46,7 @@ public class CommandShallow implements Serializable {
 		return this.commands;
 	}
 
-	public void setDragon(String[] splitted) throws ConvertationException {
+	public void setDragon(String[] splitted, String login) throws ConvertationException {
 		Color col = null;
 		switch(splitted[4]) {
 			case "GREEN":
@@ -108,9 +114,18 @@ public class CommandShallow implements Serializable {
 						Integer.parseInt(splitted[3]),
 						col,type,character,
 						splitted[7] == "" ? null : Double.parseDouble(splitted[7]),
-						splitted[8] == "" ? null : Float.parseFloat(splitted[8]));
+						splitted[8] == "" ? null : Float.parseFloat(splitted[8]),
+						login);
 	}
 	
+	public String getLogin() {
+		return login;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
 	public Dragon getDragon() {
 	  return dragon;
 	}

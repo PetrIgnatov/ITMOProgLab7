@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS USERS(
 	password TEXT NOT NULL
 );
 
+INSERT INTO USERS VALUES
+('admin', 'admin');
+
 CREATE TABLE IF NOT EXISTS DRAGONS(
 	id SERIAL UNIQUE PRIMARY KEY,
 	name TEXT NOT NULL CHECK (name != ''),
@@ -26,7 +29,8 @@ CREATE TABLE IF NOT EXISTS DRAGONS(
 	type DRAGONTYPE,
 	character DRAGONCHARACTER,
 	depth DOUBLE PRECISION NOT NULL,
-	numberOfTreasures REAL CHECK(numberOfTreasures > 0)
+	numberOfTreasures REAL CHECK(numberOfTreasures > 0),
+	login TEXT NOT NULL
 	
 );
 

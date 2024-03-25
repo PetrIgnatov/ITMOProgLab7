@@ -9,7 +9,7 @@ public class Ascending extends Command {
 		super("print_field_ascending_character", "вывести значения поля character всех элементов в порядке возрастания", 1);
 	}
 	@Override
-	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata) {
+	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String login, String password) {
 		super.check(args.length);
 		if (stacksize > 10000) {
       return new Response(new String[0]);

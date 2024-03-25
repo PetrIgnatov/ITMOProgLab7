@@ -3,24 +3,17 @@ package ru.se.ifmo.prog.lab7.commands;
 import ru.se.ifmo.prog.lab7.cores.*;
 import ru.se.ifmo.prog.lab7.classes.*;
 
-public class RemoveID extends Command {
-	public RemoveID() {
-		super("remove_by_id id", "удалить элемент из коллекции по его id", 2);
+public class SignIn extends Command {
+	public SignIn() {
+		super("sign_in login password", "войти в систему", 3, new String[0]);
 	}
 	@Override
 	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String login, String password) {
 		super.check(args.length);
 		if (stacksize > 10000) {
-      return new Response(new String[0]);
-    }
-		try {
-			Integer.parseInt(args[1]);
-		}
-		catch (Exception e) {
-			System.out.println("Error! Argument is not a number");
 			return new Response(new String[0]);
 		}
-		collectiondata.remove(Integer.parseInt(args[1]));
-		return new Response(new String[0]);
+		String[] response = new String[] {connector.signIn(args[1], args[2])};
+		return new Response(response);
 	}
 }

@@ -6,5 +6,5 @@ import ru.se.ifmo.prog.lab7.classes.*;
 public interface Executable {
 	public String getName();
 	public String getDescription();
-	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata);
+	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String login, String password);
 }

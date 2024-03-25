@@ -10,6 +10,7 @@ import ru.se.ifmo.prog.lab7.classes.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ru.se.ifmo.prog.lab7.exceptions.*;
+import java.security.*;
 
 public class Console implements Serializable {
 	private Scanner scanner;
@@ -20,9 +21,14 @@ public class Console implements Serializable {
 	private int stacksize;
 	private UDPSender sender;
 	private UDPReader reader;
+	private boolean authorized; 
+	private String login;
+	private String password;
+	private MessageDigest messageDigest;
+	private String salt;
+	private String pepper;
 
-	public Console(CommandManager commandmanager, UDPSender sender, UDPReader reader)
-	{
+	public Console(CommandManager commandmanager, UDPSender sender, UDPReader reader) throws NoSuchAlgorithmException {
 		this.scanner = new Scanner(System.in);
 		this.active = true;
 		this.history = new LinkedList<Command>();
@@ -31,6 +37,10 @@ public class Console implements Serializable {
 		this.stacksize = 0;
 		this.sender = sender;
 		this.reader = reader;
+		this.authorized = false;
+		this.messageDigest = MessageDigest.getInstance("SHA-224");
+		this.salt = "6r0870P";
+		this.pepper = "6r4PH60VN4";
 	}
 	
 	public void start(UDPConnector connector) {
@@ -44,21 +54,21 @@ public class Console implements Serializable {
 			con = true;
 			this.print("Введите IP хоста: ");
 			if (scanner.hasNextLine()) {
-			host = scanner.nextLine();
-			//Matcher matcher = pattern.matcher(host);
-    			//con = matcher.find();
-			if (con) {
-				try {
-					InetAddress.getByName(host);
+				host = scanner.nextLine();
+				//Matcher matcher = pattern.matcher(host);
+    				//con = matcher.find();
+				if (con) {
+					try {
+						InetAddress.getByName(host);
+					}
+					catch (UnknownHostException e) {
+						System.out.println("Неизвестный IP! Попробуйте ввести снова");
+						con = false;
+					}
 				}
-				catch (UnknownHostException e) {
-					System.out.println("Неизвестный IP! Попробуйте ввести снова");
+				else {
 					con = false;
 				}
-			}
-			else {
-				con = false;
-			}
 			}
 		}
 		con = false;
@@ -120,6 +130,19 @@ public class Console implements Serializable {
 					System.out.println("Клиент не может сохранять данные");
 					return;
 				}
+				else if (command != null && !authorized && !command.getName().equals("sign_in login password") && !command.getName().equals("register login password") && !command.getName().equals("help")) {
+					System.out.println("Команда " + command.getName() + " недоступна неавторизованным пользователям");
+					return;
+				}
+				else if (command != null && com.length >= 3 && (command.getName().equals("sign_in login password") || command.getName().equals("register login password"))) {
+					try {
+						com[2] = new String(messageDigest.digest((pepper+com[2]+salt).getBytes("UTF-8")));
+					}
+					catch (Exception e) {
+						System.out.println("Ошибка кодирование пароля!");
+						return;
+					}
+				}
 			}
 			catch (CommandIOException e) {
 				System.out.println(e.getMessage());
@@ -133,7 +156,7 @@ public class Console implements Serializable {
 				while (history.size() > 5) {
 					history.pollLast();
 				}
-				CommandShallow shallow = new CommandShallow(command, com);
+				CommandShallow shallow = new CommandShallow(command, com, login, password);
 				if (command.getName().equals("add {element}") || command.getName().equals("update id {element}")) {
 					String[] advices = command.getParameterAdvices();
 					String[] parameters = new String[advices.length];
@@ -214,7 +237,7 @@ public class Console implements Serializable {
 						}
 					}
 					try {
-						shallow.setDragon(parameters);
+						shallow.setDragon(parameters, login);
 					}
 					catch (Exception e) {
 						System.out.println(e.getMessage());
@@ -230,6 +253,11 @@ public class Console implements Serializable {
 					if (s.equals("exit")) {
 						this.stop();
 						break;
+					}
+					else if (s.equals("Вы успешно зашли в систему")) {
+						this.authorized = true;
+						this.login = shallow.getArguments()[1];
+						this.password = shallow.getArguments()[2];
 					}
 					System.out.println(s);
 				}
