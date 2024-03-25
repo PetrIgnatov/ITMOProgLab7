@@ -7,18 +7,39 @@ import ru.se.ifmo.prog.lab7.cores.*;
 import java.util.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
 import java.util.logging.*;
+import java.sql.*;
+import java.io.*;
 
 public class Main {
 	public static void main(String[] args) throws InputArgumentException {
-		if (args.length != 1) {
-			throw new InputArgumentException("Error! Got " + Integer.valueOf(args.length) + " arguments when 1 required (file name)");
-		}
 		Logger logger = Logger.getLogger(Main.class.getName());
 		logger.setLevel(Level.ALL);
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(Level.ALL);
 		logger.addHandler(handler);
-		CollectionData collection = new CollectionData(args[0]);
+		Properties logininfo = new Properties();
+		try {
+			logininfo.load(new FileInputStream("db.cfg"));
+		}
+		catch (Exception e) {
+			System.out.println("Ошибка! Не удалось загрузить данные из файла");
+			return;
+		}
+		DatabaseConnector DBConnector = new DatabaseConnector();
+		try {	
+			DBConnector = new DatabaseConnector(logininfo);
+		}
+		catch (SQLException e) {
+			logger.severe("Ошибка! Неверные имя пользователя или пароль");
+			return;
+		}
+		try {
+			DBConnector.getDragons();
+		}
+		catch (SQLException e) {
+			logger.severe("Ошибка! Не получается получить информацию о драконах");
+		}
+		CollectionData collection = new CollectionData("a.csv");
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			logger.info("Сохраняем коллекцию");
 			collection.save();
@@ -39,7 +60,7 @@ public class Main {
 		UDPConnector connector = new UDPConnector();
 		connector.Connect(6789, logger);
 		UDPSender sender = new UDPSender(connector.getDatagramSocket()); 
-		UDPReader reader = new UDPReader(connector.getDatagramSocket(), collection, commandmanager, sender);
+		UDPReader reader = new UDPReader(connector.getDatagramSocket(), collection, commandmanager, sender, DBConnector);
 		reader.start(logger);
 	}
 }

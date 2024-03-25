@@ -26,9 +26,11 @@ public class UDPReader {
 	private UDPSender sender;
 	private HashMap<InetAddress, LinkedList<Command>> histories;
 	private LinkedList<Command> localHistory;
+	private DatabaseConnector connector;
 
-	public UDPReader(DatagramSocket datagramSocket, CollectionData collection, CommandManager commandmanager, UDPSender sender) {
+	public UDPReader(DatagramSocket datagramSocket, CollectionData collection, CommandManager commandmanager, UDPSender sender, DatabaseConnector connector) {
 		this.active = true;
+		this.connector = connector;
 		this.datagramSocket = datagramSocket;
 		this.buffer = ByteBuffer.allocate(10000);
 		this.arr = new byte[10000];

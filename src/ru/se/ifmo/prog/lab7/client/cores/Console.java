@@ -6,7 +6,7 @@ import java.net.*;
 import java.awt.event.*;
 import ru.se.ifmo.prog.lab7.cores.*;
 import ru.se.ifmo.prog.lab7.commands.*;
-import ru.se.ifmo.prog.lab7.client.classes.*;
+import ru.se.ifmo.prog.lab7.classes.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ru.se.ifmo.prog.lab7.exceptions.*;
