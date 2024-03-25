@@ -24,8 +24,7 @@ public class UpdateID extends Command {
 		if (index == -1) {
 			return new Response(new String[] {"Error! Dragon with ID " + args[1] + " not found"});
 		}
-                collectiondata.update(dragon, index, Integer.parseInt(args[1]));
-		return new Response(new String[0]);
+       		return new Response(collectiondata.update(dragon, index, Integer.parseInt(args[1]), login));
         }
 }
 

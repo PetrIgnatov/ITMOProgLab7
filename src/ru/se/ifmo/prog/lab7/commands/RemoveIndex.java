@@ -20,7 +20,6 @@ public class RemoveIndex extends Command {
 			System.out.println("Error! Argument is not a number");
 			return new Response(new String[0]);
 		}
-		collectiondata.removeIndex(Integer.parseInt(args[1]));
-		return new Response(new String[0]);
+		return new Response(collectiondata.removeIndex(Integer.parseInt(args[1]), login));
 	}
 }

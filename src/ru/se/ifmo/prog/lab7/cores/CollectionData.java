@@ -344,56 +344,74 @@ public class CollectionData {
 		return -1;
 	}
 
-	public void update(String[] parameters, int ind, int id) {
-		Dragon newDragon = createDragon(parameters, id);
-		if (newDragon != null) {
-			dragons.set(ind, newDragon);
+	public String[] update(String[] parameters, int ind, int id, String login) {
+		if (dragons.get(findById(id)).getOwner().equals(login)) {
+			Dragon newDragon = createDragon(parameters, id);
+			if (newDragon != null) {
+				dragons.set(ind, newDragon);
+				return new String[0];
+			}
+			return new String[] {"Дракон не найден"};
 		}
+		return new String[] {"Вы не можете менять не своего дракона"};
 	}
 
-	public void update(Dragon dragon, int ind, int id) {
+	public String[] update(Dragon dragon, int ind, int id, String login) {
 		try {
 			if (!dragon.equals(null)) {
-				dragon.setId(id);
-				dragon.setDate(LocalDateTime.now());
-				System.out.println(dragon.toString());
-				dragons.set(ind, dragon);
-			}
-		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	public void remove(int id) {
-		try {
-			boolean found = false;
-			for (int i = 0; i < dragons.size(); ++i) {
-				if (dragons.get(i).getId() == id) {
-					dragons.remove(i);
-					found = true;
-					break;
+				if (login.equals(dragons.get(ind).getOwner())) {
+					dragon.setId(id);
+					dragon.setDate(LocalDateTime.now());
+					System.out.println(dragon.toString());
+					dragons.set(ind, dragon);
+					return new String[0];
+				}
+				else {
+					return new String[] {"Вы не можете менять не своего дракона"};
 				}
 			}
-			if (!found) {
-				throw new IOException("Error! Dragon with ID " + id + " not found");
-			}
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
+			return new String[] {"Произошла ошибка. Попробуйте снова"};
 		}
+		return new String[0];
 	}
 
-	public void removeIndex(int index) {
+	public String[] remove(int id, String login) {
 		try {
-			if (index < 0 || index >= dragons.size()) {
-				throw new IOException("Error! Invalid index");
+			for (int i = 0; i < dragons.size(); ++i) {
+				if (dragons.get(i).getId() == id) {
+					if (dragons.get(i).getOwner().equals(login)) {
+						dragons.remove(i);
+						return new String[0];
+					}
+					return new String[] {"Вы не можете удалить не своего дракона"};
+				}
 			}
-			dragons.remove(index);
+			return new String[] {"Дракон с ID " + id + " не найден"};
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
+		return new String[0];
+	}
+
+	public String[] removeIndex(int index, String login) {
+		try {
+			if (index < 0 || index >= dragons.size()) {
+				return new String[] {"Недопустимый индекс"};
+			}
+			if (dragons.get(index).getOwner().equals(login)) {
+				dragons.remove(index);
+				return new String[0];
+			}
+			return new String[] {"Вы не можете удалять не своего дракона"};
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return new String[0];
 	}
 	
 	public int sumAge() {
