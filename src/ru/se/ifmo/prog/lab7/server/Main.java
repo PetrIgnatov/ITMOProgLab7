@@ -27,7 +27,7 @@ public class Main {
 		}
 		DatabaseConnector DBConnector;
 		try {	
-			DBConnector = new DatabaseConnector("s408693", "ktSe!0991");
+			DBConnector = new DatabaseConnector(logininfo);
 		}
 		catch (SQLException e) {
 			logger.severe("Ошибка! Неверные имя пользователя или пароль");
