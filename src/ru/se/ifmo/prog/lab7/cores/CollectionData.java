@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Collections;
 import ru.se.ifmo.prog.lab7.exceptions.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CollectionData {
 	private LinkedList<Dragon> dragons;
@@ -356,7 +357,7 @@ public class CollectionData {
 		return new String[] {"Вы не можете менять не своего дракона"};
 	}
 
-	public String[] update(Dragon dragon, int ind, int id, String login) {
+	public synchronized String[] update(Dragon dragon, int ind, int id, String login) {
 		try {
 			if (!dragon.equals(null)) {
 				if (login.equals(dragons.get(ind).getOwner())) {
@@ -397,7 +398,7 @@ public class CollectionData {
 		return new String[0];
 	}
 
-	public String[] removeIndex(int index, String login) {
+	public synchronized String[] removeIndex(int index, String login) {
 		try {
 			if (index < 0 || index >= dragons.size()) {
 				return new String[] {"Недопустимый индекс"};

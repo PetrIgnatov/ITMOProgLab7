@@ -7,6 +7,10 @@ import java.util.Collections;
 public class Response implements Serializable {
 	private LinkedList<String> message;
 
+	public Response() {
+		message = new LinkedList<String>();
+	}
+
 	public Response(String[] messageArr) {
 		message = new LinkedList<String>();
 		for (int i = 0; i < messageArr.length; ++i) {

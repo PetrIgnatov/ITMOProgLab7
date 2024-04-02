@@ -24,9 +24,6 @@ public class Console implements Serializable {
 	private boolean authorized; 
 	private String login;
 	private String password;
-	private MessageDigest messageDigest;
-	private String salt;
-	private String pepper;
 
 	public Console(CommandManager commandmanager, UDPSender sender, UDPReader reader) throws NoSuchAlgorithmException {
 		this.scanner = new Scanner(System.in);
@@ -38,9 +35,6 @@ public class Console implements Serializable {
 		this.sender = sender;
 		this.reader = reader;
 		this.authorized = false;
-		this.messageDigest = MessageDigest.getInstance("SHA-224");
-		this.salt = "6r0870P";
-		this.pepper = "6r4PH60VN4";
 	}
 	
 	public void start(UDPConnector connector) {
@@ -130,18 +124,9 @@ public class Console implements Serializable {
 					System.out.println("Клиент не может сохранять данные");
 					return;
 				}
-				else if (command != null && !authorized && !command.getName().equals("sign_in login password") && !command.getName().equals("register login password") && !command.getName().equals("help")) {
+				else if (command != null && !authorized && !command.getName().equals("exit") && !command.getName().equals("sign_in login password") && !command.getName().equals("register login password") && !command.getName().equals("help")) {
 					System.out.println("Команда " + command.getName() + " недоступна неавторизованным пользователям");
 					return;
-				}
-				else if (command != null && com.length >= 3 && (command.getName().equals("sign_in login password") || command.getName().equals("register login password"))) {
-					try {
-						com[2] = new String(messageDigest.digest((pepper+com[2]+salt).getBytes("UTF-8")));
-					}
-					catch (Exception e) {
-						System.out.println("Ошибка кодирование пароля!");
-						return;
-					}
 				}
 			}
 			catch (CommandIOException e) {

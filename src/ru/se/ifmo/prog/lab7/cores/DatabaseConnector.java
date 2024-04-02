@@ -6,20 +6,29 @@ import java.io.*;
 import java.util.Collections.*;
 import java.util.LinkedList;
 import ru.se.ifmo.prog.lab7.classes.*;
+import java.security.*;
 
 public class DatabaseConnector {
 	private Connection connection;
+	private String pepper;
+	private Random random;
 
 	public DatabaseConnector() {
 		connection = null;
+		pepper = "63N3R470R";
+		random = new Random();
 	}
 
 	public DatabaseConnector(String name, String password) throws SQLException, SQLTimeoutException {
 		connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/proglab7", name, password);
+		pepper = "63N3R470R";
+		random = new Random();
 	}
 
 	public DatabaseConnector(Properties logininfo) throws SQLException, SQLTimeoutException {
 		connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/proglab7", logininfo);
+		pepper = "63N3R470R";
+		random = new Random();
 	}	
 
 	public LinkedList<String> getDragons() throws SQLException {
@@ -45,15 +54,22 @@ public class DatabaseConnector {
 	}
 
 	public void save(LinkedList<Dragon> dragons) throws SQLException {
-		Statement state = connection.createStatement();
-		String req = "INSERT INTO DRAGONS(id, name, x, y, creationDate, age, color, type, character, depth, numberOfTreasures, login) VALUES ";
-		for (int i = 0; i < dragons.size(); ++i) {
-			Dragon dragon = dragons.get(i);
-			String add = "(" + dragon.getId() + ", '" + (dragon.getName() != null ? dragon.getName() : "NULL") + "', " + (dragon.getCoordinates().getXPtr() != null ? dragon.getCoordinates().getX() : "NULL") + ", " + (dragon.getCoordinates().getYPtr() != null ? dragon.getCoordinates().getY() : "NULL") + ", '" + dragon.getDate().toString().replace('T', ' ') + "', " + dragon.getAge() + ", '" + dragon.getColorStr() + "', '" + dragon.getTypeStr() + "', '" + dragon.getCharacterStr() + "', " + (dragon.getCave().getDepthPtr() != null ? dragon.getCave().getDepth() : "NULL") + ", " + (dragon.getCave().getNumberOfTreasuresPtr() != null ? dragon.getCave().getNumberOfTreasures() : "NULL") + ", '" + dragon.getOwner() + "')";
-			req += add + (i == dragons.size()-1 ? " " : ", ");
+		PreparedStatement ps = connection.prepareStatement("INSERT INTO DRAGONS(id, name, x, y, creationDate, age, color, type, character, depth, numberOfTreasures, login) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = DRAGONS.name, x = DRAGONS.x, y = DRAGONS.y, age = DRAGONS.age, color = DRAGONS.color, type = DRAGONS.type, character = DRAGONS.character, depth = DRAGONS.depth, numberOfTreasures = DRAGONS.numberOfTreasures;");
+		for (Dragon dragon : dragons) {
+			ps.setInt(1, dragon.getId());
+		        ps.setString(2, (dragon.getName() != null ? dragon.getName() : "NULL"));
+			ps.setInt(3, dragon.getCoordinates().getXPtr());
+			ps.setFloat(4, dragon.getCoordinates().getYPtr());
+			ps.setTimestamp(5, java.sql.Timestamp.valueOf(dragon.getDate()));
+			ps.setInt(6, dragon.getAge());
+			ps.setObject(7, (dragon.getColorStr() != null ? dragon.getColorStr() : "NULL"), Types.OTHER);
+			ps.setObject(8, (dragon.getTypeStr() != null ? dragon.getTypeStr() : "NULL"), Types.OTHER);
+			ps.setObject(9, (dragon.getCharacterStr() != null ? dragon.getCharacterStr() : "NULL"), Types.OTHER);
+			ps.setDouble(10, dragon.getCave().getDepthPtr());
+			ps.setFloat(11, dragon.getCave().getNumberOfTreasuresPtr());
+			ps.setString(12, dragon.getOwner());
+			int result = ps.executeUpdate();
 		}
-		req += "ON CONFLICT (id) DO UPDATE SET name = DRAGONS.name, x = DRAGONS.x, y = DRAGONS.y, age = DRAGONS.age, color = DRAGONS.color, type = DRAGONS.type, character = DRAGONS.character, depth = DRAGONS.depth, numberOfTreasures = DRAGONS.numberOfTreasures;";
-		int result = state.executeUpdate(req);
 	}
 
 	public String signIn(String login, String password) {
@@ -65,7 +81,12 @@ public class DatabaseConnector {
 			while (rs.next()) {
 				++cnt;
 				String pword = rs.getString(2);
-				if (pword.equals(password)) {
+				MessageDigest md = MessageDigest.getInstance("MD2");
+				String codedpassword = rs.getString(3)+password+pepper;
+				for (int i = 0; i < rs.getInt(4); ++i) {
+					codedpassword = new String(md.digest(codedpassword.getBytes("UTF-8")));
+				}
+				if (pword.equals(codedpassword)) {
 					ok = true;
 				}
 			}
@@ -78,6 +99,7 @@ public class DatabaseConnector {
 			return "Вы успешно зашли в систему";
 		}
 		catch (Exception e) {
+			System.out.println(e.getMessage());
 			return "Ошибка! Попробуйте связаться с администратором или зайти в систему позже";
 		}
 	}
@@ -93,8 +115,23 @@ public class DatabaseConnector {
 			if (cnt > 0) {
 				return "Пользователь с таким логином уже существует! Придумайте новый";
 			}
-			String req = "INSERT INTO USERS(name, password) VALUES ('" + login + "', '" + password + "');";
-			int res = state.executeUpdate(req);
+			StringBuilder randomString = new StringBuilder();
+			for (int i = 0; i < random.nextInt(5)+5; ++i) {
+				randomString.append((char)random.nextInt(255));
+			}
+			String salt = randomString.toString();
+			String codedpassword = salt+password+pepper;
+			int repeats = 1+random.nextInt(3);
+			MessageDigest md = MessageDigest.getInstance("MD2");
+			for (int i = 0; i < repeats; ++i) {
+				codedpassword = new String(md.digest(codedpassword.getBytes("UTF-8")));
+			}
+			PreparedStatement ps = connection.prepareStatement("INSERT INTO USERS(name, password, salt, repeats) VALUES (?, ?, ?, ?);");
+			ps.setString(1, login);
+			ps.setString(2, codedpassword);
+			ps.setString(3, salt);
+			ps.setInt(4, repeats);
+			int res = ps.executeUpdate();
 			return "Вы успешно зашли в систему";
 		}
 		catch (Exception e) {

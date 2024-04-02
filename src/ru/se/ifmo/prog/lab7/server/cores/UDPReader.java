@@ -14,7 +14,10 @@ import java.util.Iterator;
 import ru.se.ifmo.prog.lab7.commands.*;
 import ru.se.ifmo.prog.lab7.cores.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
+import ru.se.ifmo.prog.lab7.server.threads.*;
 import java.sql.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class UDPReader {
 	private DatagramSocket datagramSocket;
@@ -28,6 +31,11 @@ public class UDPReader {
 	private HashMap<InetAddress, LinkedList<Command>> histories;
 	private LinkedList<Command> localHistory;
 	private DatabaseConnector connector;
+	private boolean authorized;
+	private String login;
+	private String password;
+	private ReentrantLock requestLock;
+	private ExecutorService executor;
 
 	public UDPReader(DatagramSocket datagramSocket, CollectionData collection, CommandManager commandmanager, UDPSender sender, DatabaseConnector connector) {
 		this.active = true;
@@ -40,6 +48,8 @@ public class UDPReader {
 		this.sender = sender;
 		this.histories = new HashMap<InetAddress, LinkedList<Command>>();
 		this.localHistory = new LinkedList<Command>();
+		this.requestLock = new ReentrantLock();
+		executor = Executors.newFixedThreadPool(1000);
 		try {
 			datagramSocket.setSoTimeout(100);
 		}
@@ -62,9 +72,13 @@ public class UDPReader {
 						String[] com = input.split(" ");
 						if (com.length > 0) {
 							try {
-								Command command = commandmanager.getCommand(com[0]);	
-								shallow = new CommandShallow(command, com, "admin", "admin");
-								if (command.getParameterAdvices() != null) {
+								Command command = commandmanager.getCommand(com[0]);
+								if (command != null && !authorized && !command.getName().equals("exit") && !command.getName().equals("sign_in login password") && !command.getName().equals("register login password") && !command.getName().equals("help") && !command.getName().equals("save")) {
+									System.out.println("Команда " + command.getName() + " недоступна неавторизованным пользователям");
+									continue;	
+								}
+								shallow = new CommandShallow(command, com, login, password);
+								if (command.getParameterAdvices() != null && command.getParameterAdvices().length > 0) {
 									parametersptr = 0;
 									parameters = new String[command.getParameterAdvices().length+1];
 									System.out.print(command.getParameterAdvices()[parametersptr]);
@@ -83,9 +97,9 @@ public class UDPReader {
 						parametersptr++;
 						if (parametersptr == parameters.length - 1) {
 							parametersptr = -1;
-							parameters[parameters.length-1] = "admin";
+							parameters[parameters.length-1] = login;
 							try {
-								shallow.setDragon(parameters, "admin");
+								shallow.setDragon(parameters, login);
 								this.localExecute(shallow, logger);								
 							}
 							catch (ConvertationException e) {
@@ -132,45 +146,39 @@ public class UDPReader {
 				}
 				break;
 			}
+			else if (s.equals("Вы успешно зашли в систему")) {
+                                                this.authorized = true;
+                                                this.login = shallow.getArguments()[1];
+                                                this.password = shallow.getArguments()[2];
+                        }
 			System.out.println(s);
 		}
 	}
 
 	private void readCommand(Logger logger) {
 		try {
-			datagramPacket = new DatagramPacket(arr, arr.length);
+			/*datagramPacket = new DatagramPacket(arr, arr.length);
 			datagramSocket.receive(datagramPacket);
 			ByteArrayInputStream bis = new ByteArrayInputStream(datagramPacket.getData());
 			ObjectInput in = new ObjectInputStream(bis);
-			CommandShallow shallow = (CommandShallow)in.readObject();
-			if (!histories.containsKey(datagramPacket.getAddress())) {
-				histories.put(datagramPacket.getAddress(), new LinkedList<Command>());
+			CommandShallow shallow = (CommandShallow)in.readObject(); */
+			datagramPacket = executor.submit(new ReadThread(datagramSocket)).get();
+			if (datagramPacket != null) {
+				ByteArrayInputStream bis = new ByteArrayInputStream(datagramPacket.getData());
+        	                ObjectInput in = new ObjectInputStream(bis);
+                	        CommandShallow shallow = (CommandShallow)in.readObject();
+				Response response = new Response();
+				FutureTask<Response> future = new FutureTask<>(new RequestThread(requestLock, collection, shallow, histories, datagramPacket.getAddress(), commandmanager, connector));
+				Thread requestThread = new Thread(future);
+				requestThread.start();
+				sender.send(future.get(), datagramPacket.getAddress(), datagramPacket.getPort(), logger);
 			}
-			histories.get(datagramPacket.getAddress()).addLast(shallow.getCommand());
-			if (histories.get(datagramPacket.getAddress()).size() > 5) {
-				histories.get(datagramPacket.getAddress()).removeFirst();
-			}
-			Response response;
-			logger.info("Got packet with command " + shallow.getCommand().getName());
-			if (!shallow.getCommand().getName().equals("history")) {
-				Integer stacksize = 0;
-				response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, shallow.getLogin(), shallow.getPassword());
-			}
-			else {
-				String[] history = new String[histories.get(datagramPacket.getAddress()).size()];
-				for (int i = 0; i < history.length; ++i) {
-					history[i] = histories.get(datagramPacket.getAddress()).get(i).getName();
-				}
-				response = new Response(history);
-			}
-			//System.out.println(datagramPacket.getAddress().toString());
-			sender.send(response, datagramPacket.getAddress(), datagramPacket.getPort(), logger);
 			//showMessage(datagramPacket);
 		}
-		catch (IOException e) {
-	//		System.out.println(e.getMessage());
-		}
-		catch (ClassNotFoundException e) {
+		catch (InterruptedException e) {
+        		e.printStackTrace();
+        	}
+		catch (Exception e) {
 			logger.severe(e.getMessage());
 		}
 	}

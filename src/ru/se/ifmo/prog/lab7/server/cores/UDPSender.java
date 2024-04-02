@@ -8,27 +8,25 @@ import java.awt.event.*;
 import java.util.Iterator;
 import ru.se.ifmo.prog.lab7.commands.*;
 import ru.se.ifmo.prog.lab7.cores.*;
+import ru.se.ifmo.prog.lab7.server.threads.*;
 import java.util.logging.*;
+import java.util.concurrent.ForkJoinPool;
 
 public class UDPSender {
 	private DatagramSocket datagramSocket;
-	
+	private ForkJoinPool forkJoinPool;
+
 	public UDPSender(DatagramSocket datagramSocket) {
 		this.datagramSocket = datagramSocket;
+		this.forkJoinPool = new ForkJoinPool();
 	}
 
 	public void send(Response response, InetAddress address, int port, Logger logger) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(baos);
-			oos.writeObject(response);
-			byte[] arr = baos.toByteArray();
-			DatagramPacket datagramPacket = new DatagramPacket(arr, arr.length, address, port);
-			datagramSocket.send(datagramPacket);
-			logger.fine("Sent " + arr.length + " bytes");
+		if (!forkJoinPool.invoke(new SendThread(response, datagramSocket, address, port))) {
+			logger.severe("Error sending response!");
 		}
-		catch (IOException e) {
-			logger.severe(e.getMessage());
+		else {
+			logger.fine("Sent response successfully!");
 		}
 	}
 }
