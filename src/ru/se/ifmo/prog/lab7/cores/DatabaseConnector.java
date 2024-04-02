@@ -20,13 +20,13 @@ public class DatabaseConnector {
 	}
 
 	public DatabaseConnector(String name, String password) throws SQLException, SQLTimeoutException {
-		connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/proglab7", name, password);
+		connection = DriverManager.getConnection("jdbc:postgresql://pg:5432/studs", name, password);
 		pepper = "63N3R470R";
 		random = new Random();
 	}
 
 	public DatabaseConnector(Properties logininfo) throws SQLException, SQLTimeoutException {
-		connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/proglab7", logininfo);
+		connection = DriverManager.getConnection("jdbc:postgresql://pg:5432/studs", logininfo);
 		pepper = "63N3R470R";
 		random = new Random();
 	}	
