@@ -53,7 +53,7 @@ public class RequestThread implements Callable<Response> {
                                 response = new Response(history);
                         }
 			for (String s : response.getMessage()) {
-                                System.out.println(s);
+                               // System.out.println(s);
                         }
 			System.out.println("Thread over");
 		}

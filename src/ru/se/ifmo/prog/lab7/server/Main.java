@@ -19,7 +19,7 @@ public class Main {
 		logger.addHandler(handler);
 		Properties logininfo = new Properties();
 		try {
-			logininfo.load(new FileInputStream("db.cfg"));
+			logininfo.load(new FileInputStream("db1.cfg"));
 		}
 		catch (Exception e) {
 			System.out.println("Ошибка! Не удалось загрузить данные из файла");

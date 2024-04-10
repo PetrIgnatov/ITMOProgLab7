@@ -387,6 +387,7 @@ public class CollectionData {
 						dragons.remove(i);
 						return new String[0];
 					}
+					System.out.println(login + " " + dragons.get(i).getOwner());
 					return new String[] {"Вы не можете удалить не своего дракона"};
 				}
 			}
@@ -425,8 +426,8 @@ public class CollectionData {
 
 	public String dragonsString() {
 		String s = "";
-		for (Dragon dragon : dragons) {
-			s += dragon.toString() + "\n";
+		for (int i = Math.max(0,dragons.size()-100); i < dragons.size(); ++i) {
+			s += dragons.get(i).toString() + "\n";
 		}
 		return s;
 	}

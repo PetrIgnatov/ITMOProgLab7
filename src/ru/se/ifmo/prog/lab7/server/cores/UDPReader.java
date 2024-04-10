@@ -36,9 +36,12 @@ public class UDPReader {
 	private String password;
 	private ReentrantLock requestLock;
 	private ExecutorService executor;
+	private int prevThreads;
+	private int connected;
 
 	public UDPReader(DatagramSocket datagramSocket, CollectionData collection, CommandManager commandmanager, UDPSender sender, DatabaseConnector connector) {
 		this.active = true;
+		this.connected = 0;
 		this.connector = connector;
 		this.datagramSocket = datagramSocket;
 		this.buffer = ByteBuffer.allocate(10000);
@@ -49,7 +52,7 @@ public class UDPReader {
 		this.histories = new HashMap<InetAddress, LinkedList<Command>>();
 		this.localHistory = new LinkedList<Command>();
 		this.requestLock = new ReentrantLock();
-		executor = Executors.newFixedThreadPool(1000);
+		executor = Executors.newFixedThreadPool(500);
 		try {
 			datagramSocket.setSoTimeout(100);
 		}
@@ -100,7 +103,7 @@ public class UDPReader {
 							parameters[parameters.length-1] = login;
 							try {
 								shallow.setDragon(parameters, login);
-								this.localExecute(shallow, logger);								
+								this.localExecute(shallow, logger);			
 							}
 							catch (ConvertationException e) {
 								System.out.println(e.getMessage());
@@ -130,7 +133,7 @@ public class UDPReader {
 				System.out.println(com.getName());
 			}
 		}
-		Response response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, "admin", "admin");
+		Response response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, login, password);
 		for (String s: response.getMessage()) {
 			if (s.equals("exit")) {
 				this.stop();
@@ -162,16 +165,29 @@ public class UDPReader {
 			ByteArrayInputStream bis = new ByteArrayInputStream(datagramPacket.getData());
 			ObjectInput in = new ObjectInputStream(bis);
 			CommandShallow shallow = (CommandShallow)in.readObject(); */
+			if (prevThreads != Thread.getAllStackTraces().keySet().size()) {
+				logger.info("Запущено " + Thread.getAllStackTraces().keySet().size() + " потоков");
+			}
+			prevThreads = Thread.getAllStackTraces().keySet().size();
 			datagramPacket = executor.submit(new ReadThread(datagramSocket)).get();
+			if (datagramPacket != null && new String(datagramPacket.getData(), 0, datagramPacket.getLength()).isEmpty()) {
+				datagramPacket = null;
+			}
 			if (datagramPacket != null) {
 				ByteArrayInputStream bis = new ByteArrayInputStream(datagramPacket.getData());
         	                ObjectInput in = new ObjectInputStream(bis);
                 	        CommandShallow shallow = (CommandShallow)in.readObject();
-				Response response = new Response();
-				FutureTask<Response> future = new FutureTask<>(new RequestThread(requestLock, collection, shallow, histories, datagramPacket.getAddress(), commandmanager, connector));
-				Thread requestThread = new Thread(future);
-				requestThread.start();
-				sender.send(future.get(), datagramPacket.getAddress(), datagramPacket.getPort(), logger);
+				if (shallow.getCommand().getName().equals("sign_in login password") || shallow.getCommand().getName().equals("register login password") || shallow.getCommand().getName().equals("exit") || shallow.getCommand().getName().equals("help") || (shallow.getLogin() != null && shallow.getPassword() != null)) {
+					Response response = new Response();
+					logger.info("Создаем поток");
+					FutureTask<Response> future = new FutureTask<>(new RequestThread(requestLock, collection, shallow, histories, datagramPacket.getAddress(), commandmanager, connector));
+					Thread requestThread = new Thread(future);
+					requestThread.start();
+					if (future.get().getMessage().length >= 1 && !(future.get().getMessage()[0].equals("null") || future.get().getMessage()[0] == null))
+					{
+						sender.send(future.get(), datagramPacket.getAddress(), datagramPacket.getPort(), logger);
+					}
+				}
 			}
 			//showMessage(datagramPacket);
 		}
@@ -185,6 +201,8 @@ public class UDPReader {
 
 
 	public void stop() {
+		executor.shutdown();
 		this.active = false;
 	}
 }
+

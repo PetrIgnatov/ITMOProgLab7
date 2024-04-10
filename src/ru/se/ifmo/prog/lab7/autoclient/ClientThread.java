@@ -1,31 +1,35 @@
-package ru.se.ifmo.prog.lab7.client;
+package ru.se.ifmo.prog.lab7.autoclient;
 
-import ru.se.ifmo.prog.lab7.classes.*;
-import ru.se.ifmo.prog.lab7.commands.*;
+import java.nio.*;
+import java.net.*;
+import java.nio.channels.*;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Callable;
 import ru.se.ifmo.prog.lab7.cores.*;
-import ru.se.ifmo.prog.lab7.client.cores.*;
+import ru.se.ifmo.prog.lab7.commands.*;
+import ru.se.ifmo.prog.lab7.autoclient.cores.*;
 import java.util.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
 
-public class Main {
-	public static void main(String[] args) throws InputArgumentException {
-		boolean auto = false;
-		if (!(args.length == 0 || args.length == 3)) {
-			throw new InputArgumentException("Error! Got " + Integer.valueOf(args.length) + " arguments when 0 required");
-		}
-		if (args.length >= 1) {
-			auto = true;
-		}
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			System.out.println("\nВыключаем клиент");
-			}));
-		if (!auto) {
-		CommandManager commandmanager = new CommandManager();
+public class ClientThread implements Runnable {
+	private int j;
+	private String ip;
+	private int port;
+
+        public ClientThread(int j, String ip, int port) {
+		this.j = j;
+		this.ip = ip;
+		this.port = port;
+        }
+        @Override
+        public void run() {
+        	CommandManager commandmanager = new CommandManager();
 		UDPConnector connector = new UDPConnector();
 		UDPSender sender = new UDPSender(); 
 		UDPReader reader = new UDPReader();
 		try {
-			Console console = new Console(commandmanager, sender, reader);	
+			Console console = new Console(commandmanager, sender, reader);
+			console.setServer(ip, port);
 			String[] comnames = {"help", "info", "show", "add", "update", "remove_by_id", "clear", "save", "execute_script", "exit", "remove_at", "sort", "history", "sum_of_age", "print_field_ascending_character", "print_field_descending_character", "sign_in", "register"};
 			Command[] coms = {new Help(), new Info(), new Show(), new Add(), new UpdateID(), new RemoveID(), new Clear(), new Save(), new ExecuteScript(), new Exit(), new RemoveIndex(), new Sort(), new History(), new SumOfAge(), new Ascending(), new Descending(), new SignIn(), new Register()};
 			for (int i = 0; i < coms.length; ++i)
@@ -37,20 +41,13 @@ public class Main {
 					System.out.println(e.getMessage());
 				}
 			}	
-			console.start(connector, auto, null);
+			 console.start(connector, "script" + j + ".gl");
+			 System.out.println("Thread finished");
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.out.println("Фатальная ошибка! Дайте программисту по горбу");
 		}
-		}
-		else {
-			for (int j = 0; j <= 19; ++j) {
-				System.out.println("Creating thread " + j);
-				Runnable r = new ClientThread(auto, j%3+1, args[1], Integer.parseInt(args[2]));
-				Thread thread = new Thread(r, "new thread");
-				thread.start();
-			}
-		}
-	}
+        }
 }
+

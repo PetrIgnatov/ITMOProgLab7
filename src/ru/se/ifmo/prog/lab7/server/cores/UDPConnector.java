@@ -17,6 +17,7 @@ public class UDPConnector {
 			datagramSocket = new DatagramSocket(port);
 			String localhost = InetAddress.getLocalHost().getHostAddress();
         Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces();
+	
 			while (e.hasMoreElements()) {
             NetworkInterface ni = (NetworkInterface) e.nextElement();
             if(ni.isLoopback())
@@ -33,9 +34,10 @@ public class UDPConnector {
                 }
             }
 			}
-			logger.fine("Сервер запущен " + localhost + " с портом " + port);
+			logger.fine("Сервер запущен " + localhost + " с портом " + port); 
 		}
-		catch (IOException e) {
+		catch (Exception e) {
+			logger.severe(e.getClass().getName());
 			logger.severe(e.getMessage());
 			return false;
 		}

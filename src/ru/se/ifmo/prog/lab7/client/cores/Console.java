@@ -24,6 +24,8 @@ public class Console implements Serializable {
 	private boolean authorized; 
 	private String login;
 	private String password;
+	private String serverip;
+	private int serverport;
 
 	public Console(CommandManager commandmanager, UDPSender sender, UDPReader reader) throws NoSuchAlgorithmException {
 		this.scanner = new Scanner(System.in);
@@ -37,7 +39,12 @@ public class Console implements Serializable {
 		this.authorized = false;
 	}
 	
-	public void start(UDPConnector connector) {
+	public void setServer(String ip, int port) {
+		this.serverip = ip;
+		this.serverport = port;
+	}
+
+	public void start(UDPConnector connector, boolean auto, String scriptName) {
 		boolean con = false;
 		String host = "";
 		int port = 0;
@@ -64,6 +71,13 @@ public class Console implements Serializable {
 					con = false;
 				}
 			}
+				try {
+					InetAddress.getByName(serverip);
+				}
+				catch (UnknownHostException e) {
+					System.out.println("Неизвестный IP! Попробуйте ввести снова");
+					con = false;
+				}
 		}
 		con = false;
 		while (!con) {

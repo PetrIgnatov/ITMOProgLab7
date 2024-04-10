@@ -20,7 +20,7 @@ public class ReadThread implements Callable<DatagramPacket> {
 		try {
 			byte[] arr = new byte[10000];
 			DatagramPacket datagramPacket = new DatagramPacket(arr, arr.length);
-			datagramSocket.receive(datagramPacket);
+			datagramSocket.receive(datagramPacket);	
 			return datagramPacket;
 		}
 		catch (Exception e) {
