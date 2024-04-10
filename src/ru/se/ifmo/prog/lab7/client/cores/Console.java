@@ -124,7 +124,7 @@ public class Console implements Serializable {
 	}
 
 	public void readCommand() {
-		String[] com; 
+		/*String[] com; 
 		stacksize = 0;
 		if (!scanner.hasNextLine()) {
 			return;
@@ -242,6 +242,10 @@ public class Console implements Serializable {
 						System.out.println(e.getMessage());
 					}
 				}
+	*/
+			try {
+				String[] com = scanner.nextLine().split(" ");
+				StringShallow shallow = new StringShallow(com, login, password);
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ObjectOutputStream oos = new ObjectOutputStream(baos);
 				oos.writeObject(shallow);
@@ -255,8 +259,8 @@ public class Console implements Serializable {
 					}
 					else if (s.equals("Вы успешно зашли в систему")) {
 						this.authorized = true;
-						this.login = shallow.getArguments()[1];
-						this.password = shallow.getArguments()[2];
+						this.login = com[1];
+						this.password = com[2];
 					}
 					System.out.println(s);
 				}
@@ -268,7 +272,7 @@ public class Console implements Serializable {
 			catch (IOException e) {
 				System.out.println(e.getMessage());
 			}
-		}
+		//}
 	}
 
 	

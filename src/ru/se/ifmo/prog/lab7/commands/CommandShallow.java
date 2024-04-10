@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import ru.se.ifmo.prog.lab7.classes.*;
 import ru.se.ifmo.prog.lab7.exceptions.*;
+import ru.se.ifmo.prog.lab7.cores.*;
 
 public class CommandShallow implements Serializable {
 	private Command command;
@@ -12,7 +13,8 @@ public class CommandShallow implements Serializable {
 	private CommandShallow[] commands;
 	private String login;
 	private String password;
-	
+	private String[] params;
+
 	public CommandShallow() {
 		this.command = null;
 		this.args = null;
@@ -28,6 +30,29 @@ public class CommandShallow implements Serializable {
 		this.login = login;
 		this.password = password;
 		this.command.check(args.length);
+		this.params = null;
+	}
+
+	public CommandShallow(Command command, String[] args, int paramsSize, String login, String password) {
+                this.command = command;
+                this.args = args;
+                this.dragon = null;
+                this.login = login;
+                this.password = password;
+                this.command.check(args.length);
+                this.params = new String[paramsSize];
+        }
+	
+	public Response execute(Integer stacksize, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector) {
+		return command.execute(args, stacksize, dragon, commandmanager, collectiondata, connector, params, login, password);	
+	}	
+
+	public void setParameter(int i, String val) {
+		this.params[i] = val;
+	}
+
+	public String[] getParameters() {
+		return params;
 	}
 
 	public Command getCommand() {

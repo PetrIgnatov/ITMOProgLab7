@@ -11,15 +11,17 @@ import ru.se.ifmo.prog.lab7.commands.*;
 
 public class ReadThread implements Callable<DatagramPacket> {
 	private DatagramSocket datagramSocket;
+	private byte[] arr;
+	private DatagramPacket datagramPacket;
 
 	public ReadThread(DatagramSocket datagramSocket) {
 		this.datagramSocket = datagramSocket;
+		arr = new byte[10000];
+		datagramPacket = new DatagramPacket(arr, arr.length);
 	}
 	@Override
 	public DatagramPacket call() {
 		try {
-			byte[] arr = new byte[10000];
-			DatagramPacket datagramPacket = new DatagramPacket(arr, arr.length);
 			datagramSocket.receive(datagramPacket);	
 			return datagramPacket;
 		}

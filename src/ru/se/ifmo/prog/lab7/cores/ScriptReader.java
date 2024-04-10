@@ -35,16 +35,6 @@ public class ScriptReader {
 						if (parametersptr == -1) {
 							String[] com = line.split(" ");
 							line = "";
-						/*
-						if (commandsStack.size() == 0) {
-							stacksize = 0;
-							com = scanner.nextLine().split(" ");
-						}
-						else {
-							this.println(commandsStack.peek());
-							com = commandsStack.removeFirst().split(" ");
-						}
-						*/
 							if (com.length > 0) {
 								try {
 									Command command = commandmanager.getCommand(com[0]);

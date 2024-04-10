@@ -10,13 +10,27 @@ public abstract class Command implements Executable, Serializable {
 	CollectionData collectiondata;
 	int argsnumber;
 	String[] parametersAdvices;
+	String[] parametersTypes;
+	Checker[] checkers;
 	public int calls;
 
 	public Command(String name, String description, int argsnumber, String[] parametersAdvices) {
+                this.name = name;
+                this.description = description;
+                this.argsnumber = argsnumber;
+                this.parametersAdvices = parametersAdvices;
+                this.parametersTypes = new String[0];
+		this.checkers = new Checker[0];
+                this.calls = 1;
+        }
+
+	public Command(String name, String description, int argsnumber, String[] parametersAdvices, String[] parametersTypes, Checker[] checkers) {
 		this.name = name;
 		this.description = description;
 		this.argsnumber = argsnumber;
 		this.parametersAdvices = parametersAdvices;
+		this.parametersTypes = parametersTypes;
+		this.checkers = checkers;
 		this.calls = 1;
 	}
 
@@ -43,5 +57,20 @@ public abstract class Command implements Executable, Serializable {
 
 	public String[] getParameterAdvices() {
 		return parametersAdvices;
+	}
+
+	public String[] getParametersTypes() {
+		return parametersTypes;
+	}
+
+	public Checker[] getCheckers() {
+		return checkers;
+	}
+
+	public Checker getChecker(int i) {
+		if (i >= checkers.length) {
+			return null;
+		}
+		return checkers[i];
 	}
 }

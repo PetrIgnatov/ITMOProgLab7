@@ -14,12 +14,12 @@ public class RequestThread implements Callable<Response> {
 	private ReentrantLock locker;
 	private CollectionData data;
 	private CommandShallow shallow;
-        private HashMap<InetAddress, LinkedList<Command>> histories;
+        private HashMap<String, LinkedList<Command>> histories;
 	private InetAddress address;
 	private CommandManager commandmanager;
 	private DatabaseConnector connector;
 
-	public RequestThread(ReentrantLock locker, CollectionData data, CommandShallow shallow, HashMap<InetAddress, LinkedList<Command>> histories, InetAddress address, CommandManager commandmanager, DatabaseConnector connector) {
+	public RequestThread(ReentrantLock locker, CollectionData data, CommandShallow shallow, HashMap<String, LinkedList<Command>> histories, InetAddress address, CommandManager commandmanager, DatabaseConnector connector) {
 		this.data = data;
 		this.locker = locker;
 		this.shallow = shallow;
@@ -34,19 +34,21 @@ public class RequestThread implements Callable<Response> {
 		locker.lock();
 		Response response = new Response();
 		try {
-			if (!histories.containsKey(address)) {
-                                histories.put(address, new LinkedList<Command>());
-                        }
-                        histories.get(address).addLast(shallow.getCommand());
-                        if (histories.get(address).size() > 5) {
-                                histories.get(address).removeFirst();
-                        }
+			if (shallow.getLogin() == null) {
+				if (!histories.containsKey(shallow.getLogin())) {
+        	                        histories.put(shallow.getLogin(), new LinkedList<Command>());
+	                        }
+                        	histories.get(shallow.getLogin()).addLast(shallow.getCommand());
+                	        if (histories.get(shallow.getLogin()).size() > 5) {
+        	                        histories.get(shallow.getLogin()).removeFirst();
+	                        }
+			}
                         if (!shallow.getCommand().getName().equals("history")) {
                                 Integer stacksize = 0;
-                                response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, data, connector, shallow.getLogin(), shallow.getPassword());
+                                response = shallow.execute(stacksize, commandmanager, data, connector);
                         }
                         else {
-                                String[] history = new String[histories.get(address).size()];
+                                String[] history = new String[histories.get(shallow.getLogin()).size()];
                                 for (int i = 0; i < history.length; ++i) {
                                         history[i] = histories.get(address).get(i).getName();
                                 }

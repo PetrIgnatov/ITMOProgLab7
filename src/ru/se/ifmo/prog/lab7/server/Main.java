@@ -14,6 +14,7 @@ public class Main {
 	public static void main(String[] args) throws InputArgumentException {
 		Logger logger = Logger.getLogger(Main.class.getName());
 		logger.setLevel(Level.ALL);
+		logger.info("Запускаем сервер...");
 		ConsoleHandler handler = new ConsoleHandler();
 		handler.setLevel(Level.ALL);
 		logger.addHandler(handler);

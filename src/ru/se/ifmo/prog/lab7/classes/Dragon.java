@@ -18,6 +18,7 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 	private String owner;
 	
 	public Dragon(int id, String name, Coordinates coordinates, LocalDateTime creationDate, int age, Color color, DragonType type, DragonCharacter character, DragonCave cave, String owner) {
+		System.out.println(character);
 		this.setId(id);
 		this.setName(name);
 		this.setCoordinates(coordinates);
@@ -98,6 +99,7 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 	}
 	
 	private void setCharacter(DragonCharacter character) {
+		System.out.println(character);
 		this.character = character;
 	}
 	

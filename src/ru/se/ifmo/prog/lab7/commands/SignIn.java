@@ -8,7 +8,7 @@ public class SignIn extends Command {
 		super("sign_in login password", "войти в систему", 3, new String[0]);
 	}
 	@Override
-	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String login, String password) {
+	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String[] params, String login, String password) {
 		super.check(args.length);
 		if (stacksize > 10000) {
 			return new Response(new String[0]);

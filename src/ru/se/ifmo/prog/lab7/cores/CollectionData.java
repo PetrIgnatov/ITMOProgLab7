@@ -232,7 +232,8 @@ public class CollectionData {
 	}
 	
 	public Dragon createDragon(String[] splitted, int id) {
-		try {
+		LocalDateTime date = LocalDateTime.now();
+                try {
 			Color col = null;
 			switch(splitted[4]) {
 				case "GREEN":
@@ -293,15 +294,13 @@ public class CollectionData {
 				default:
 					throw new ConvertationException("Error! Unknown character \"" + splitted[6] + "\"");
 			}
-			String format = "yyyy-MM-dd HH:mm:ss";
-			DateTimeFormatter formater = DateTimeFormatter.ofPattern(format);
-			LocalDateTime date = LocalDateTime.parse(splitted[4], formater);
 			if (splitted[0] == "") {
 				throw new IOException("Ошибка! Имя не может быть равен null");
 			}
 			if (splitted[3] == "") {
 				throw new IOException("Ошибка! Возраст не может быть равен null");
 			}
+			System.out.println("Formatted successfully!");
 			return new Dragon(
 					id,
 					splitted[0].equals("") ? null : splitted[0],
@@ -321,8 +320,13 @@ public class CollectionData {
 	}
 
 	public void add(String[] splitted) {
+		System.out.println("Creating dragon");
+		for (int i = 0; i < splitted.length; ++i) {
+			System.out.println(i + " " + splitted[i]);
+		}
 		Dragon newDragon = createDragon(splitted, maxId+1);
 		if (newDragon != null) {
+			System.out.println(newDragon.toString());
 			dragons.add(newDragon);
 			++maxId;
 		}

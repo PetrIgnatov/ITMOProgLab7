@@ -36,7 +36,7 @@ public class CommandManager implements Serializable {
 		if (commandList.containsKey(name)) {
 			return commandList.get(name);
 		}
-		throw new CommandIOException("Error! Unknown command \"" + name + "\"");
+		return null;
 	}
 }
 
