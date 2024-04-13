@@ -31,6 +31,7 @@ public class Main {
 			DBConnector = new DatabaseConnector(logininfo);
 		}
 		catch (SQLException e) {
+			logger.severe(e.getMessage());
 			logger.severe("Ошибка! Неверные имя пользователя или пароль");
 			return;
 		}

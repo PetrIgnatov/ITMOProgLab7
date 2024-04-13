@@ -99,7 +99,6 @@ public class Dragon implements Comparable<Dragon>, Serializable {
 	}
 	
 	private void setCharacter(DragonCharacter character) {
-		System.out.println(character);
 		this.character = character;
 	}
 	

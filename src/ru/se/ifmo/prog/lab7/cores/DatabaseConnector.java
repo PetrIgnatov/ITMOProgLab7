@@ -20,13 +20,13 @@ public class DatabaseConnector {
 	}
 
 	public DatabaseConnector(String name, String password) throws SQLException, SQLTimeoutException {
-		connection = DriverManager.getConnection("jdbc:postgresql://192.168.31.253:5432/studs", name, password);
+		connection = DriverManager.getConnection("jdbc:postgresql://217.66.152.184:5432/studs", name, password);
 		pepper = "63N3R470R";
 		random = new Random();
 	}
 
 	public DatabaseConnector(Properties logininfo) throws SQLException, SQLTimeoutException {
-		connection = DriverManager.getConnection("jdbc:postgresql://192.168.31.253:5432/proglab7", logininfo);
+		connection = DriverManager.getConnection("jdbc:postgresql://192.168.168.225:5432/proglab7", logininfo);
 		pepper = "63N3R470R";
 		random = new Random();
 	}	
@@ -52,8 +52,14 @@ public class DatabaseConnector {
 		}
 		return dragons;
 	}
+	
+	public void clear() throws SQLException {
+		Statement state = connection.createStatement();
+                int res = state.executeUpdate("DELETE FROM DRAGONS;");
+	}
 
 	public void save(LinkedList<Dragon> dragons) throws SQLException {
+		clear();
 		PreparedStatement ps = connection.prepareStatement("INSERT INTO DRAGONS(id, name, x, y, creationDate, age, color, type, character, depth, numberOfTreasures, login) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = DRAGONS.name, x = DRAGONS.x, y = DRAGONS.y, age = DRAGONS.age, color = DRAGONS.color, type = DRAGONS.type, character = DRAGONS.character, depth = DRAGONS.depth, numberOfTreasures = DRAGONS.numberOfTreasures;");
 		for (Dragon dragon : dragons) {
 			ps.setInt(1, dragon.getId());

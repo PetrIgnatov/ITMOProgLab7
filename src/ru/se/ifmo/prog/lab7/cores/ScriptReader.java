@@ -27,8 +27,10 @@ public class ScriptReader {
 			try {
 				int parametersptr = -1;
 				CommandShallow shallow = new CommandShallow();
-				while ((temp = reader.read()) != -1) {
-					if ((char)temp != '\n') {
+				int inputParams = 0;
+				while (true) {
+					temp = reader.read();
+					if ((char)temp != '\n' && temp != -1) {
 						line += (char)temp;
 					}
 					else {
@@ -38,13 +40,19 @@ public class ScriptReader {
 							if (com.length > 0) {
 								try {
 									Command command = commandmanager.getCommand(com[0]);
-									if (command.getParameterAdvices() != null) {
-										parametersptr = 0;
-										parameters = new String[command.getParameterAdvices().length];
+									if (command != null) {
+										if (command.getParameterAdvices() != null && command.getParameterAdvices().length != 0) {
+											parametersptr = 0;
+											inputParams = command.getParameterAdvices().length;
+											parameters = new String[command.getParametersTypes().length];
+											if (parameters.length != 0 && command.getParametersTypes().length != command.getParameterAdvices().length) {
+												parameters[parameters.length-1] = login;
+											}
+										}	
+										shallow = new CommandShallow(command, com, login, password);
+										//Случай add или update
+										shallows.addLast(shallow);
 									}
-									shallow = new CommandShallow(command, com, login, password);
-									//Случай add или update
-									shallows.addLast(shallow);
 								}
 								catch (Exception e) {
 									System.out.println(e.getMessage());
@@ -55,15 +63,19 @@ public class ScriptReader {
 							parameters[parametersptr] = line;
 							line = "";
 							parametersptr++;
-							if (parametersptr == parameters.length) {
+							if (parametersptr >= inputParams) {
 								parametersptr = -1;
-								try {
-									shallow.setDragon(parameters, login);
-								}
+								//try {
+								shallow.setParameters(parameters);
+									//setlogin
+								/*}
 								catch (ConvertationException e) {
 									System.out.println(e.getMessage());
-								}
+								}*/
 							}
+						}
+						if (temp == -1) {
+							break;
 						}
 					}
 				}

@@ -21,6 +21,7 @@ public class CommandShallow implements Serializable {
 		this.dragon = null;
 		this.login = null;
 		this.password = null;
+		this.params = new String[0];
 	}
 
 	public CommandShallow(Command command, String[] args, String login, String password) {
@@ -29,8 +30,7 @@ public class CommandShallow implements Serializable {
 		this.dragon = null;
 		this.login = login;
 		this.password = password;
-		this.command.check(args.length);
-		this.params = null;
+		this.params = new String[0];
 	}
 
 	public CommandShallow(Command command, String[] args, int paramsSize, String login, String password) {
@@ -39,16 +39,26 @@ public class CommandShallow implements Serializable {
                 this.dragon = null;
                 this.login = login;
                 this.password = password;
-                this.command.check(args.length);
                 this.params = new String[paramsSize];
         }
 	
 	public Response execute(Integer stacksize, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector) {
-		return command.execute(args, stacksize, dragon, commandmanager, collectiondata, connector, params, login, password);	
+		try {
+			this.command.check(args.length);
+			return command.execute(args, stacksize, dragon, commandmanager, collectiondata, connector, params, login, password);
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+			return new Response(new String[] {e.getMessage()});
+		}	
 	}	
 
 	public void setParameter(int i, String val) {
 		this.params[i] = val;
+	}
+
+	public void setParameters(String[] val) {
+		this.params = val;
 	}
 
 	public String[] getParameters() {

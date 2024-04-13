@@ -84,6 +84,10 @@ public class UDPReader {
 									System.out.println("Команда " + command.getName() + " недоступна неавторизованным пользователям");
 									continue;	
 								}
+								if (command == null) {
+									System.out.println("Неизвестная команда!");
+									continue;
+								}
 								shallow = new CommandShallow(command, com, login, password);
 								if (command.getParameterAdvices() != null && command.getParameterAdvices().length > 0) {
 									parametersptr = 0;
@@ -105,13 +109,8 @@ public class UDPReader {
 						if (parametersptr == parameters.length - 1) {
 							parametersptr = -1;
 							parameters[parameters.length-1] = login;
-							try {
-								shallow.setDragon(parameters, login);
-								this.localExecute(shallow, logger);			
-							}
-							catch (ConvertationException e) {
-								System.out.println(e.getMessage());
-							}
+							shallow.setParameters(parameters);
+							this.localExecute(shallow, logger);		
 						}
 						else {
 							System.out.print(shallow.getCommand().getParameterAdvices()[parametersptr]);
@@ -137,7 +136,9 @@ public class UDPReader {
 				System.out.println(com.getName());
 			}
 		}
-		Response response = shallow.getCommand().execute(shallow.getArguments(), stacksize, shallow.getDragon(), commandmanager, collection, connector, null, login, password);
+		System.out.println("Executing");
+		Response response = shallow.execute(stacksize,  commandmanager, collection, connector);
+		System.out.println("Executed");
 		for (String s: response.getMessage()) {
 			if (s.equals("exit")) {
 				this.stop();
@@ -169,8 +170,11 @@ public class UDPReader {
 			ByteArrayInputStream bis = new ByteArrayInputStream(datagramPacket.getData());
 			ObjectInput in = new ObjectInputStream(bis);
 			CommandShallow shallow = (CommandShallow)in.readObject(); */
+			if (executor.isTerminated() || !active) {
+				return;
+			}
 			if (prevThreads != Thread.getAllStackTraces().keySet().size()) {
-				logger.info("Запущено " + Thread.getAllStackTraces().keySet().size() + " потоков");
+	//			logger.info("Запущено " + Thread.getAllStackTraces().keySet().size() + " потоков");
 			}
 			prevThreads = Thread.getAllStackTraces().keySet().size();
 			datagramPacket = executor.submit(new ReadThread(datagramSocket)).get();
@@ -272,21 +276,28 @@ public class UDPReader {
 
 	public void executeRequest(CommandShallow shallow, Logger logger) {
 		try {
+			
 			FutureTask<Response> future = new FutureTask<>(new RequestThread(requestLock, collection, shallow, histories, datagramPacket.getAddress(), commandmanager, connector));
 			Thread requestThread = new Thread(future);
 			requestThread.start();
-			if (future.get().getMessage().length >= 1 && !(future.get().getMessage()[0].equals("null") || future.get().getMessage()[0] == null)) {
+			if (future.get().getMessage().length == 0 || (future.get().getMessage().length >= 1 && !(future.get().getMessage()[0].equals("null") || future.get().getMessage()[0] == null))) {
 				sender.send(future.get(), datagramPacket.getAddress(), datagramPacket.getPort(), logger);
 			}
 		}
 		catch (Exception e) {
 			logger.info("Поток прерван");
 		}
+		
 	}
 
 	public void stop() {
-		executor.shutdown();
-		this.active = false;
+		try {
+			this.active = false;
+			executor.shutdown();
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }
 

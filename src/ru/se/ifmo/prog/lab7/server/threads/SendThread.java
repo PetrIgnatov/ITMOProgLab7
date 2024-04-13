@@ -27,13 +27,9 @@ public class SendThread extends RecursiveTask<Boolean> {
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         ObjectOutputStream oos = new ObjectOutputStream(baos);
                         oos.writeObject(response);
-			System.out.println("oos written");
                         byte[] arr = baos.toByteArray();
-			System.out.println("arr created");
                         DatagramPacket datagramPacket = new DatagramPacket(arr, arr.length, address, port);
-			System.out.println("packet created");
                         datagramSocket.send(datagramPacket);
-			System.out.println("packet sent");
                         return true;
                 }
                 catch (Exception e) {

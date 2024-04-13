@@ -225,6 +225,7 @@ public class CollectionData {
 
 	public void clear() {
 		dragons.clear();
+		maxId = 0;
 	}
 
 	public void sort() {
@@ -300,7 +301,6 @@ public class CollectionData {
 			if (splitted[3] == "") {
 				throw new IOException("Ошибка! Возраст не может быть равен null");
 			}
-			System.out.println("Formatted successfully!");
 			return new Dragon(
 					id,
 					splitted[0].equals("") ? null : splitted[0],
@@ -320,13 +320,8 @@ public class CollectionData {
 	}
 
 	public void add(String[] splitted) {
-		System.out.println("Creating dragon");
-		for (int i = 0; i < splitted.length; ++i) {
-			System.out.println(i + " " + splitted[i]);
-		}
 		Dragon newDragon = createDragon(splitted, maxId+1);
 		if (newDragon != null) {
-			System.out.println(newDragon.toString());
 			dragons.add(newDragon);
 			++maxId;
 		}
@@ -391,7 +386,6 @@ public class CollectionData {
 						dragons.remove(i);
 						return new String[0];
 					}
-					System.out.println(login + " " + dragons.get(i).getOwner());
 					return new String[] {"Вы не можете удалить не своего дракона"};
 				}
 			}

@@ -1,6 +1,7 @@
 package ru.se.ifmo.prog.lab7.commands;
 
 import ru.se.ifmo.prog.lab7.cores.*;
+import ru.se.ifmo.prog.lab7.exceptions.*;
 import java.io.Serializable;
 
 public abstract class Command implements Executable, Serializable {
@@ -13,6 +14,17 @@ public abstract class Command implements Executable, Serializable {
 	String[] parametersTypes;
 	Checker[] checkers;
 	public int calls;
+
+	public Command(String name, String description, int argsnumber) {
+                this.name = name;
+                this.description = description;
+                this.argsnumber = argsnumber;
+                this.parametersAdvices = new String[0];
+                this.parametersTypes = new String[0];
+                this.checkers = new Checker[0];
+                this.calls = 1;
+        }
+
 
 	public Command(String name, String description, int argsnumber, String[] parametersAdvices) {
                 this.name = name;
@@ -34,15 +46,9 @@ public abstract class Command implements Executable, Serializable {
 		this.calls = 1;
 	}
 
-	public Command(String name, String description, int argsnumber) {
-		this.name = name;
-		this.description = description;
-		this.argsnumber = argsnumber;
-	}
-
-	public void check(int argsnumber) {
+	public void check(int argsnumber) throws InputArgumentException{
 		if (this.argsnumber != argsnumber) {
-			throw new IllegalArgumentException("Error! Got " + Integer.valueOf(argsnumber-1) + " arguments when " + Integer.valueOf(this.argsnumber-1) + " needed");
+			throw new InputArgumentException("Неверное количество аргументов: " + Integer.valueOf(argsnumber-1) + " вместо " + Integer.valueOf(this.argsnumber-1));
 		}
 	}
 	

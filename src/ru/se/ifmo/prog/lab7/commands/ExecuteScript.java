@@ -11,14 +11,22 @@ public class ExecuteScript extends Command {
 	}
 	@Override
 	public Response execute(String[] args, Integer stacksize, Dragon dragon, CommandManager commandmanager, CollectionData collectiondata, DatabaseConnector connector, String[] params, String login, String password) {
-		super.check(args.length);
 		if (stacksize > 1000) {
 			return new Response(new String[0]);
 		}
 		LinkedList<CommandShallow> commandsList = ScriptReader.readCommands(args[1], commandmanager, login, password);
+		if (commandsList.size() == 0) {
+			return new Response(new String[] {"Файл не найден или пуст"});
+		}
 		Response response = new Response(new String[0]);
 		for (CommandShallow command : commandsList) {
-			response.addLines(command.execute(++stacksize, commandmanager, collectiondata, connector).getMessage());
+			String[] res = command.execute(++stacksize, commandmanager, collectiondata, connector).getMessage();
+			if (res.length > 0) {
+				response.addLines(res);
+			}
+		}
+		for (int i = 0; i < response.getMessage().length; ++i) {
+			System.out.println(response.getMessage()[i]);
 		}
 		return response;
 	}
